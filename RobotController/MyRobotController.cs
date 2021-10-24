@@ -97,6 +97,7 @@ namespace RobotController
             
             bool myCondition = true;
             //todo: add a check for your condition
+            MyQuat rotInit0, rotInit1, rotInit2, rotInit3;
             MyVec axis;
             axis.x = 0;
             axis.y = 1;
@@ -108,28 +109,31 @@ namespace RobotController
             rot1 = Rotate(rot0, axis, 0);
             rot2 = Rotate(rot1, axis, 68);
             rot3 = Rotate(rot2, axis, 34);
-
+            rotInit0 = rot0;
+            rotInit1 = rot1;
+            rotInit2 = rot2;
+            rotInit3 = rot3;
             if (myCondition)
             {
                 //todo: add your code here
                 
-                axis.x = 0;
-                axis.y = 1;
-                axis.z = 0;
-                rot0 = Slerp(rot0, Rotate(NullQ, axis, 45));
-                axis.x = 1;
-                axis.y = 0;
-                rot1 = Slerp(rot1, Rotate(rot0, axis, 0));
-                rot2 = Slerp(rot2, Rotate(rot1, axis, 68));
-                rot3 = Slerp(rot3, Rotate(rot2, axis, 34));
-                time += 0.003f;
-                if (time > 1.0f)
-                {
-                    return false;
-                }
-                return true;
+               axis.x = 0;
+               axis.y = 1;
+               axis.z = 0;
+               rot0 = Slerp(rotInit0, Rotate(NullQ, axis, 35));
+               axis.x = 1;
+               axis.y = 0;
+               rot1 = Slerp(rotInit1, Rotate(rot0, axis, 0));
+               rot2 = Slerp(rotInit2, Rotate(rot1, axis, 80));
+               rot3 = Slerp(rotInit3, Rotate(rot2, axis, 34));
+               time += 0.003f;
+               if (time > 1.0f)
+               {
+                   return false;
+               }
+               return true;
             }
-            //rot0 = Rotate(NullQ, axis, 20);
+            
             return false;
         }
 
