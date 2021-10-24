@@ -7,10 +7,9 @@ using System.Text;
 
 namespace RobotController
 {
-
+    
     public struct MyQuat
     {
-
         public float w;
         public float x;
         public float y;
@@ -55,7 +54,7 @@ namespace RobotController
 
     public class MyRobotController
     {
-
+        float time = 0;
         #region public methods
 
         public string Hi()
@@ -95,25 +94,42 @@ namespace RobotController
 
         public bool PickStudAnim(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3)
         {
-
-            bool myCondition = false;
+            
+            bool myCondition = true;
             //todo: add a check for your condition
+            MyVec axis;
+            axis.x = 0;
+            axis.y = 1;
+            axis.z = 0;
+
+            rot0 = Rotate(NullQ, axis, 73);
+            axis.x = 1;
+            axis.y = 0;
+            rot1 = Rotate(rot0, axis, 0);
+            rot2 = Rotate(rot1, axis, 68);
+            rot3 = Rotate(rot2, axis, 34);
 
             if (myCondition)
             {
                 //todo: add your code here
-                rot0 = NullQ;
-                rot1 = NullQ;
-                rot2 = NullQ;
-                rot3 = NullQ;
-
-
+                
+                axis.x = 0;
+                axis.y = 1;
+                axis.z = 0;
+                rot0 = Slerp(rot0, Rotate(NullQ, axis, 45));
+                axis.x = 1;
+                axis.y = 0;
+                rot1 = Slerp(rot1, Rotate(rot0, axis, 0));
+                rot2 = Slerp(rot2, Rotate(rot1, axis, 68));
+                rot3 = Slerp(rot3, Rotate(rot2, axis, 34));
+                time += 0.003f;
+                if (time > 1.0f)
+                {
+                    return false;
+                }
                 return true;
             }
-            rot0 = NullQ;
-            rot1 = NullQ;
-            rot2 = NullQ;
-            rot3 = NullQ;
+            //rot0 = Rotate(NullQ, axis, 20);
             return false;
         }
 
@@ -237,18 +253,20 @@ namespace RobotController
 
         //todo: add here all the functions needed
 
-        internal MyQuat Slerp(MyQuat a, MyQuat b, float angle)
+        internal MyQuat Slerp(MyQuat a, MyQuat b)
         {
-            float radian, pi;
+            float radian, pi, angle;
             pi = 3.141592653589793f;
+            angle = a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z;
             radian = (angle * pi) / 180;
             MyQuat ans;
 
-            ans.w = ((float)Math.Sin(radian) / (float)Math.Sin(radian)) * a.w + ((float)Math.Sin(radian) / (float)Math.Sin(radian)) * b.w;
+            ans.w = ((float)Math.Sin((1 - time) * radian) / (float)Math.Sin(radian)) * a.w + ((float)Math.Sin(radian) / (float)Math.Sin(time * radian)) * b.w;
+            ans.x = ((float)Math.Sin((1 - time) * radian) / (float)Math.Sin(radian)) * a.x + ((float)Math.Sin(radian) / (float)Math.Sin(time * radian)) * b.x;
+            ans.y = ((float)Math.Sin((1 - time) * radian) / (float)Math.Sin(radian)) * a.y + ((float)Math.Sin(radian) / (float)Math.Sin(time * radian)) * b.y;
+            ans.z = ((float)Math.Sin((1 - time) * radian) / (float)Math.Sin(radian)) * a.z + ((float)Math.Sin(radian) / (float)Math.Sin(time * radian)) * b.z;
             //(sin((1-t)radian)/sin(radian))* a + (sin(radian)/sin(t*radian))* b
 
-
-            ans = NullQ; //Treure-ho
             return ans;
         }
 
