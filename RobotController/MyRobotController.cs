@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+
+
 namespace RobotController
 {
 
@@ -13,11 +15,34 @@ namespace RobotController
         public float x;
         public float y;
         public float z;
+        public MyQuat Normalize(MyQuat myQuat)
+        {
+            MyQuat ans;
+            float multQuat = myQuat.w * myQuat.w + myQuat.x * myQuat.x + myQuat.y * myQuat.y + myQuat.z * myQuat.z;
+            float sqQuat = (float)Math.Sqrt(multQuat);
+
+            ans.w = myQuat.w / sqQuat;
+            ans.x = myQuat.x / sqQuat;
+            ans.y = myQuat.y / sqQuat;
+            ans.z = myQuat.z / sqQuat;
+
+            return ans;
+        }
+        public MyQuat Conjugate(MyQuat myQuat)
+        {
+            MyQuat ans;
+
+            ans.w = myQuat.w;
+            ans.x = -myQuat.x;
+            ans.y = -myQuat.y;
+            ans.z = -myQuat.z;
+
+            return ans;
+        }
     }
 
     public struct MyVec
     {
-
         public float x;
         public float y;
         public float z;
@@ -33,8 +58,6 @@ namespace RobotController
 
         #region public methods
 
-
-
         public string Hi()
         {
 
@@ -46,13 +69,22 @@ namespace RobotController
 
         //EX1: this function will place the robot in the initial position
 
-        public void PutRobotStraight(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3) {
+        public void PutRobotStraight(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3)
+        {
 
             //todo: change this, use the function Rotate declared below
-            rot0 = NullQ;
-            rot1 = NullQ;
-            rot2 = NullQ;
-            rot3 = NullQ;
+            MyVec axis;
+            axis.x = 0;
+            axis.y = 1;
+            axis.z = 0;
+
+            rot0 = Rotate(NullQ, axis, 73);
+            axis.x = 1;
+            axis.y = 0;
+            rot1 = Rotate(rot0, axis, 0);
+            rot2 = Rotate(rot1, axis, 68);
+            rot3 = Rotate(rot2, axis, 34);
+
         }
 
 
@@ -67,8 +99,6 @@ namespace RobotController
             bool myCondition = false;
             //todo: add a check for your condition
 
-
-
             if (myCondition)
             {
                 //todo: add your code here
@@ -80,13 +110,10 @@ namespace RobotController
 
                 return true;
             }
-
-            //todo: remove this once your code works.
             rot0 = NullQ;
             rot1 = NullQ;
             rot2 = NullQ;
             rot3 = NullQ;
-
             return false;
         }
 
@@ -160,25 +187,70 @@ namespace RobotController
             }
         }
 
-        internal MyQuat Multiply(MyQuat q1, MyQuat q2) {
-
+        internal MyQuat Multiply(MyQuat q1, MyQuat q2)
+        {
             //todo: change this so it returns a multiplication:
-            return NullQ;
+            MyQuat ans;
+            ans.w = q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z;
+            ans.x = q1.w * q2.x + q1.x * q2.w - q1.y * q2.z + q1.z * q2.y;
+            ans.y = q1.w * q2.y + q1.x * q2.z + q1.y * q2.w - q1.z * q2.x;
+            ans.z = q1.w * q2.z - q1.x * q2.y + q1.y * q2.x + q1.z * q2.w;
 
+            return ans;
+        }
+
+        internal MyQuat Addition(MyQuat q1, MyQuat q2)
+        {
+            //todo: change this
+            MyQuat ans;
+            ans.w = q1.w * q2.w;
+            ans.x = q1.x * q2.x;
+            ans.y = q1.y * q2.y;
+            ans.z = q1.z * q2.z;
+
+            return ans;
         }
 
         internal MyQuat Rotate(MyQuat currentRotation, MyVec axis, float angle)
         {
-
             //todo: change this so it takes currentRotation, and calculate a new quaternion rotated by an angle "angle" radians along the normalized axis "axis"
-            return NullQ;
+            MyQuat ans, a, result;
+            float radian, pi;
+            a = currentRotation;
+            pi = 3.141592653589793f;
+            radian = (angle * pi) / 180;
+            float halfAngle = radian * 0.5f;
+            float s = (float)Math.Sin(halfAngle);
+            float c = (float)Math.Cos(halfAngle);
 
+            ans.w = c;
+            ans.x = axis.x * s;
+            ans.y = axis.y * s;
+            ans.z = axis.z * s;
+
+            result = Multiply(ans, a);
+            return result;
         }
 
 
 
 
         //todo: add here all the functions needed
+
+        internal MyQuat Slerp(MyQuat a, MyQuat b, float angle)
+        {
+            float radian, pi;
+            pi = 3.141592653589793f;
+            radian = (angle * pi) / 180;
+            MyQuat ans;
+
+            ans.w = ((float)Math.Sin(radian) / (float)Math.Sin(radian)) * a.w + ((float)Math.Sin(radian) / (float)Math.Sin(radian)) * b.w;
+            //(sin((1-t)radian)/sin(radian))* a + (sin(radian)/sin(t*radian))* b
+
+
+            ans = NullQ; //Treure-ho
+            return ans;
+        }
 
         #endregion
 
