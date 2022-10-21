@@ -11,30 +11,7 @@ namespace RobotController
         public float x;
         public float y;
         public float z;
-        public MyQuat Normalize(MyQuat myQuat)
-        {
-            MyQuat ans;
-            float multQuat = myQuat.w * myQuat.w + myQuat.x * myQuat.x + myQuat.y * myQuat.y + myQuat.z * myQuat.z;
-            float sqQuat = (float)Math.Sqrt(multQuat);
-
-            ans.w = myQuat.w / sqQuat;
-            ans.x = myQuat.x / sqQuat;
-            ans.y = myQuat.y / sqQuat;
-            ans.z = myQuat.z / sqQuat;
-
-            return ans;
-        }
-        public MyQuat Conjugate(MyQuat myQuat)
-        {
-            MyQuat ans;
-
-            ans.w = myQuat.w;
-            ans.x = -myQuat.x;
-            ans.y = -myQuat.y;
-            ans.z = -myQuat.z;
-
-            return ans;
-        }
+       
     }
 
     public struct MyVec
@@ -61,26 +38,29 @@ namespace RobotController
             return s;
 
         }
-
+        float time = 0;
 
         //EX1: this function will place the robot in the initial position
 
         public void PutRobotStraight(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3)
         {
-
+            time = 0;
+            rot0 = NullQ;
+            rot1 = NullQ;
+            rot2 = NullQ;
+            rot3 = NullQ;
             //todo: change this, use the function Rotate declared below
             MyVec axis;
             axis.x = 0;
             axis.y = 1;
             axis.z = 0;
-
             rot0 = Rotate(NullQ, axis, 73);
             axis.x = 1;
             axis.y = 0;
             rot1 = Rotate(rot0, axis, 0);
             rot2 = Rotate(rot1, axis, 68);
             rot3 = Rotate(rot2, axis, 34);
-            time = 0;
+
         }
 
 
@@ -88,18 +68,16 @@ namespace RobotController
         //EX2: this function will interpolate the rotations necessary to move the arm of the robot until its end effector collides with the target (called Stud_target)
         //it will return true until it has reached its destination. The main project is set up in such a way that when the function returns false, the object will be droped and fall following gravity.
 
-        float time = 0;
+
         public bool PickStudAnim(out MyQuat rot0, out MyQuat rot1, out MyQuat rot2, out MyQuat rot3)
         {
-            
+            rot0 = NullQ;
+            rot1 = NullQ;
+            rot2 = NullQ;
+            rot3 = NullQ;
             bool myCondition = true;
             //todo: add a check for your condition
             MyVec axis;
-           
-           //rot0 = NullQ;
-           //rot1 = NullQ;
-           //rot2 = NullQ;
-           //rot3 = NullQ;
 
             axis.x = 0;
             axis.y = 1;
@@ -118,18 +96,18 @@ namespace RobotController
                 axis.x = 0;
                 axis.y = 1;
                 axis.z = 0;
-                rot0 = Slerp(rot0, Rotate(NullQ, axis, 30), time);
+                rot0 = Slerp(rot0, Rotate(NullQ, axis, 35), time);
                 //rot0 = Slerp(rot0, Rotate(NullQ, axis, 30), time);
                 axis.x = 1;
                 axis.y = 0;
-                rot1 = Slerp(rot1, Rotate(rot0, axis, -20), time);
-                rot2 = Slerp(rot2, Rotate(rot1, axis, 84),  time);
-                rot3 = Slerp(rot3, Rotate(rot2, axis, 24), time);
+                rot1 = Slerp(rot1, Rotate(rot0, axis, 5), time);
+                rot2 = Slerp(rot2, Rotate(rot1, axis, 70), time);
+                rot3 = Slerp(rot3, Rotate(rot2, axis, 16), time);
                 //rot1 = Slerp(rot1, Rotate(rot0, axis, -5), time);
                 //rot2 = Slerp(rot2, Rotate(rot1, axis, 84), time);
                 //rot3 = Slerp(rot3, Rotate(rot2, axis, 16), time);
-                time += 0.003f;
-                if (time >= 4.0f)
+                time += 0.0033f;
+                if (time >= 1f)
                 {
                     return false;
                     
@@ -216,9 +194,9 @@ namespace RobotController
             //todo: change this so it returns a multiplication:
             MyQuat ans;
             ans.w = (q1.w * q2.w) - (q1.x * q2.x) - (q1.y * q2.y) - (q1.z * q2.z);
-            ans.x = (q1.w * q2.x) + (q1.x * q2.w) - (q1.y * q2.z) + (q1.z * q2.y);
-            ans.y = (q1.w * q2.y) + (q1.x * q2.z) + (q1.y * q2.w) - (q1.z * q2.x);
-            ans.z = (q1.w * q2.z) - (q1.x * q2.y) + (q1.y * q2.x) + (q1.z * q2.w);
+            ans.x = (q1.w * q2.x) + (q1.x * q2.w) + (q1.y * q2.z) - (q1.z * q2.y);
+            ans.y = (q1.w * q2.y) - (q1.x * q2.z) + (q1.y * q2.w) + (q1.z * q2.x);
+            ans.z = (q1.w * q2.z) + (q1.x * q2.y) - (q1.y * q2.x) + (q1.z * q2.w);
 
             return ans;
         }
@@ -235,12 +213,36 @@ namespace RobotController
             return ans;
         }
 
+        internal MyQuat Normalize(MyQuat myQuat)
+        {
+            MyQuat ans;
+            float multQuat = myQuat.w * myQuat.w + myQuat.x * myQuat.x + myQuat.y * myQuat.y + myQuat.z * myQuat.z;
+            float sqQuat = (float)Math.Sqrt(multQuat);
+
+            ans.w = myQuat.w / sqQuat;
+            ans.x = myQuat.x / sqQuat;
+            ans.y = myQuat.y / sqQuat;
+            ans.z = myQuat.z / sqQuat;
+
+            return ans;
+        }
+        internal MyQuat Conjugate(MyQuat myQuat)
+        {
+            MyQuat ans;
+
+            ans = Normalize(myQuat);
+            ans.x = -myQuat.x;
+            ans.y = -myQuat.y;
+            ans.z = -myQuat.z;
+
+            return ans;
+        }
+
         internal MyQuat Rotate(MyQuat currentRotation, MyVec axis, float angle)
         {
             //todo: change this so it takes currentRotation, and calculate a new quaternion rotated by an angle "angle" radians along the normalized axis "axis"
-            MyQuat ans, a, result;
+            MyQuat ans;
             float radian, pi;
-            a = currentRotation;
             pi = 3.141592653589793f;
 
             //radian = (angle * (pi /180));
@@ -250,34 +252,33 @@ namespace RobotController
             float c = (float)Math.Cos(halfAngle);
 
             ans.w = c;
-            ans.x = axis.x * s;
-            ans.y = axis.y * s;
-            ans.z = axis.z * s;
 
-            result = Multiply(ans, a);
-            return result;
+            ans.x = s * axis.x;
+            ans.y = s * axis.y;
+            ans.z = s * axis.z;
+
+            ans = Normalize(ans);
+            currentRotation = Normalize(currentRotation);
+
+            currentRotation = Multiply(currentRotation, ans);
+
+            return Normalize(currentRotation);
         }
-
-
-
 
         //todo: add here all the functions needed
 
-        internal MyQuat Slerp(MyQuat a, MyQuat b, float time)
+        internal MyQuat Slerp(MyQuat q1, MyQuat q2, float time)
         {
             float angle;
-            MyQuat q1, q2;
-            q1 = b.Normalize(b);
-            q2 = a.Normalize(a);
-            angle = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
+            angle = q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
             MyQuat ans;
-
-            ans.w = q1.w *(((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle))) + q2.w *(((float)Math.Sin(angle) / (float)Math.Sin(time * angle)));
-            ans.x = q1.x *(((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle))) + q2.x *(((float)Math.Sin(angle) / (float)Math.Sin(time * angle)));
-            ans.y = q1.y *(((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle))) + q2.y *(((float)Math.Sin(angle) / (float)Math.Sin(time * angle)));
-            ans.z = q1.z *(((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle))) + q2.z *(((float)Math.Sin(angle) / (float)Math.Sin(time * angle)));
+  
+            ans.w = ((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle)) * q1.w + ((float)Math.Sin((time) * angle) / (float)Math.Sin(angle)) * q2.w;
+            ans.x = ((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle)) * q1.x + ((float)Math.Sin((time) * angle) / (float)Math.Sin(angle)) * q2.x;
+            ans.y = ((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle)) * q1.y + ((float)Math.Sin((time) * angle) / (float)Math.Sin(angle)) * q2.y;
+            ans.z = ((float)Math.Sin((1 - time) * angle) / (float)Math.Sin(angle)) * q1.z + ((float)Math.Sin((time) * angle) / (float)Math.Sin(angle)) * q2.z;
             //(sin((1-t)radian)/sin(radian))* a + (sin(radian)/sin(t*radian))* b
-            ans = ans.Normalize(ans);
+            Normalize(ans);
             return ans;
         }
 
